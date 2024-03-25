@@ -6,18 +6,23 @@ Widget::Widget(QWidget *parent)
     , ui(new Ui::Widget)
 {
     ui->setupUi(this);
-
     // socket_.connected();
     // socket_.readyRead();
-    QObject::connect(&socket_,&QAbstractSocket::connected,this,&Widget::doConnected);
-    QObject::connect(&socket_,&QAbstractSocket::disconnected,this,&Widget::doDisconnected);
-    QObject::connect(&socket_,&QAbstractSocket::readyRead,this,&Widget::doReadyRead);
+    QObject::connect(&socket_tcp,&QAbstractSocket::connected,this,&Widget::doConnected);
+    QObject::connect(&socket_tcp,&QAbstractSocket::disconnected,this,&Widget::doDisconnected);
+    QObject::connect(&socket_tcp,&QAbstractSocket::readyRead,this,&Widget::doReadyRead);
+    QObject::connect(&socket_ssl,&QAbstractSocket::connected,this,&Widget::doConnected);
+    QObject::connect(&socket_ssl,&QAbstractSocket::disconnected,this,&Widget::doDisconnected);
+    QObject::connect(&socket_ssl,&QAbstractSocket::readyRead,this,&Widget::doReadyRead);
+
 }
 
 Widget::~Widget()
 {
     delete ui;
 }
+
+int sslState = 0;
 
 void Widget::doConnected() {
     ui->pteMessage->insertPlainText("Connected \n");
@@ -28,27 +33,59 @@ void Widget::doDisconnected() {
 }
 
 void Widget::doReadyRead(){
-    ui->pteMessage->insertPlainText(socket_.readAll());
+    if (ui->checkBox->isChecked()) {
+        ui->pteMessage->insertPlainText(socket_ssl.readAll());
+    }
+    else {
+        ui->pteMessage->insertPlainText(socket_tcp.readAll());
+    }
+
+}
+
+void Widget::on_checkBox_stateChanged(int arg1)
+{
+    if (ui->checkBox->isChecked()) {
+        ui->pteMessage->insertPlainText("SSL mode. Please change the port number to 443\n");
+    }
+    else {
+        ui->pteMessage->insertPlainText("TCP mode. Please change the port number to 80\n");
+    }
 }
 
 void Widget::on_pbConnect_clicked()
 {
-    // socket_.connectToHostEncrypted(ui->leHost->text(), ui->lePort->text().toUShort()); //SSL
-    socket_.connectToHost(ui->leHost->text(), ui->lePort->text().toUShort()); //TCP,UDP
+    if (ui->checkBox->isChecked()) {
+        socket_ssl.connectToHostEncrypted(ui->leHost->text(), ui->lePort->text().toUShort()); //SSL
+    }
+    else {
+        socket_tcp.connectToHost(ui->leHost->text(), ui->lePort->text().toUShort()); //TCP,UDP
+    }
 }
 
 void Widget::on_pbDisconnect_clicked()
 {
-    socket_.close();
+    if (ui->checkBox->isChecked()) {
+        socket_ssl.close();
+    }
+    else {
+        socket_tcp.close();
+    }
+
 }
 
 void Widget::on_pbSend_clicked()
 {
-    socket_.write(ui->pteSend->toPlainText().toUtf8());
+    if (ui->checkBox->isChecked()) {
+        socket_ssl.write(ui->pteSend->toPlainText().toUtf8());
+    }
+    else {
+        socket_tcp.write(ui->pteSend->toPlainText().toUtf8());
+    }
 }
 
 void Widget::on_pbClear_clicked()
 {
     ui->pteMessage->clear();
 }
+
 

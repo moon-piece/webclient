@@ -19,8 +19,8 @@ class Widget : public QWidget
 public:
     Widget(QWidget *parent = nullptr);
     ~Widget();
-    QTcpSocket socket_;
-    // QSslSocket socket_;
+    QTcpSocket socket_tcp;
+    QSslSocket socket_ssl;
     // QUdpSocket socket_;
 
 public slots:
@@ -34,6 +34,8 @@ private slots:
     void on_pbSend_clicked();
 
     void on_pbClear_clicked();
+
+    void on_checkBox_stateChanged(int arg1);
 
 private:
     Ui::Widget *ui;
