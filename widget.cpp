@@ -8,6 +8,7 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     // socket_.connected();
     // socket_.readyRead();
+    changeEnabled();
     QObject::connect(&socket_tcp,&QAbstractSocket::connected,this,&Widget::doConnected);
     QObject::connect(&socket_tcp,&QAbstractSocket::disconnected,this,&Widget::doDisconnected);
     QObject::connect(&socket_tcp,&QAbstractSocket::readyRead,this,&Widget::doReadyRead);
@@ -22,7 +23,12 @@ Widget::~Widget()
     delete ui;
 }
 
-int sslState = 0;
+void Widget::changeEnabled(){
+    ui->pbConnect->setEnabled(socket_tcp.state() != QAbstractSocket::ConnectedState);
+    ui->pbConnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
+    ui->pbDisconnect->setEnabled(socket_tcp.state() == QAbstractSocket::ConnectedState);
+    ui->pbDisconnect->setEnabled(socket_ssl.state() == QAbstractSocket::ConnectedState);
+}
 
 void Widget::doConnected() {
     ui->pteMessage->insertPlainText("Connected \n");
@@ -45,10 +51,12 @@ void Widget::doReadyRead(){
 void Widget::on_checkBox_stateChanged(int arg1)
 {
     if (ui->checkBox->isChecked()) {
-        ui->pteMessage->insertPlainText("SSL mode. Please change the port number to 443\n");
+        ui->pteMessage->insertPlainText("SSL mode.\n");
+        ui->lePort->setText("443");
     }
     else {
-        ui->pteMessage->insertPlainText("TCP mode. Please change the port number to 80\n");
+        ui->pteMessage->insertPlainText("TCP mode.\n");
+        ui->lePort->setText("80");
     }
 }
 
@@ -60,17 +68,20 @@ void Widget::on_pbConnect_clicked()
     else {
         socket_tcp.connectToHost(ui->leHost->text(), ui->lePort->text().toUShort()); //TCP,UDP
     }
+    changeEnabled();
 }
 
 void Widget::on_pbDisconnect_clicked()
 {
     if (ui->checkBox->isChecked()) {
         socket_ssl.close();
+        changeEnabled();
     }
     else {
         socket_tcp.close();
+        changeEnabled();
     }
-
+    changeEnabled();
 }
 
 void Widget::on_pbSend_clicked()
