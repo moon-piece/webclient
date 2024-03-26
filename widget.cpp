@@ -23,12 +23,12 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::changeEnabled(bool able){
-    ui->pbConnect->setEnabled(false);
-    // ui->pbConnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
-    // ui->pbDisconnect->setEnabled(able);
-    // ui->pbDisconnect->setEnabled(/*socket_ssl.state() == QAbstractSocket::ConnectedState);
-}
+// void Widget::changeEnabled(bool able){
+//     ui->pbConnect->setEnabled(false);
+//     // ui->pbConnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
+//     // ui->pbDisconnect->setEnabled(able);
+//     // ui->pbDisconnect->setEnabled(/*socket_ssl.state() == QAbstractSocket::ConnectedState);
+// }
 
 void Widget::doConnected() {
     ui->pteMessage->insertPlainText("Connected \n");
@@ -64,24 +64,32 @@ void Widget::on_pbConnect_clicked()
 {
     if (ui->checkBox->isChecked()) {
         socket_ssl.connectToHostEncrypted(ui->leHost->text(), ui->lePort->text().toUShort()); //SSL
+        ui->pbConnect->setEnabled(socket_tcp.state() == QAbstractSocket::ConnectedState);
+        ui->pbDisconnect->setEnabled(socket_tcp.state() != QAbstractSocket::ConnectedState);
     }
     else {
         socket_tcp.connectToHost(ui->leHost->text(), ui->lePort->text().toUShort()); //TCP,UDP
+        ui->pbConnect->setEnabled(socket_ssl.state() == QAbstractSocket::ConnectedState);
+        ui->pbDisconnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
     }
-    ui->pbConnect->setEnabled(false);
-    ui->pbDisconnect->setEnabled(true);
+    // ui->pbConnect->setEnabled(false);
+    // ui->pbDisconnect->setEnabled(true);
 }
 
 void Widget::on_pbDisconnect_clicked()
 {
     if (ui->checkBox->isChecked()) {
         socket_ssl.close();
+        ui->pbConnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
+        ui->pbDisconnect->setEnabled(socket_ssl.state() == QAbstractSocket::ConnectedState);
     }
     else {
         socket_tcp.close();
+        ui->pbConnect->setEnabled(socket_tcp.state() != QAbstractSocket::ConnectedState);
+        ui->pbDisconnect->setEnabled(socket_tcp.state() == QAbstractSocket::ConnectedState);
     }
-    ui->pbConnect->setEnabled(true);
-    ui->pbDisconnect->setEnabled(false);
+    // ui->pbConnect->setEnabled(true);
+    // ui->pbDisconnect->setEnabled(false);
 }
 
 void Widget::on_pbSend_clicked()
