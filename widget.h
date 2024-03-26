@@ -27,15 +27,13 @@ public slots:
     void doConnected();
     void doDisconnected();
     void doReadyRead();
-    void changeEnabled();
+    void changeEnabled(bool able);
 
 private slots:
     void on_pbConnect_clicked();
     void on_pbDisconnect_clicked();
     void on_pbSend_clicked();
-
     void on_pbClear_clicked();
-
     void on_checkBox_stateChanged(int arg1);
 
 private:

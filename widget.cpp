@@ -8,7 +8,7 @@ Widget::Widget(QWidget *parent)
     ui->setupUi(this);
     // socket_.connected();
     // socket_.readyRead();
-    changeEnabled();
+    ui->pbDisconnect->setEnabled(false);
     QObject::connect(&socket_tcp,&QAbstractSocket::connected,this,&Widget::doConnected);
     QObject::connect(&socket_tcp,&QAbstractSocket::disconnected,this,&Widget::doDisconnected);
     QObject::connect(&socket_tcp,&QAbstractSocket::readyRead,this,&Widget::doReadyRead);
@@ -23,11 +23,11 @@ Widget::~Widget()
     delete ui;
 }
 
-void Widget::changeEnabled(){
-    ui->pbConnect->setEnabled(socket_tcp.state() != QAbstractSocket::ConnectedState);
-    ui->pbConnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
-    ui->pbDisconnect->setEnabled(socket_tcp.state() == QAbstractSocket::ConnectedState);
-    ui->pbDisconnect->setEnabled(socket_ssl.state() == QAbstractSocket::ConnectedState);
+void Widget::changeEnabled(bool able){
+    ui->pbConnect->setEnabled(false);
+    // ui->pbConnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
+    // ui->pbDisconnect->setEnabled(able);
+    // ui->pbDisconnect->setEnabled(/*socket_ssl.state() == QAbstractSocket::ConnectedState);
 }
 
 void Widget::doConnected() {
@@ -68,20 +68,20 @@ void Widget::on_pbConnect_clicked()
     else {
         socket_tcp.connectToHost(ui->leHost->text(), ui->lePort->text().toUShort()); //TCP,UDP
     }
-    changeEnabled();
+    ui->pbConnect->setEnabled(false);
+    ui->pbDisconnect->setEnabled(true);
 }
 
 void Widget::on_pbDisconnect_clicked()
 {
     if (ui->checkBox->isChecked()) {
         socket_ssl.close();
-        changeEnabled();
     }
     else {
         socket_tcp.close();
-        changeEnabled();
     }
-    changeEnabled();
+    ui->pbConnect->setEnabled(true);
+    ui->pbDisconnect->setEnabled(false);
 }
 
 void Widget::on_pbSend_clicked()
