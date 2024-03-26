@@ -62,6 +62,7 @@ void Widget::on_checkBox_stateChanged(int arg1)
 
 void Widget::on_pbConnect_clicked()
 {
+    ui->checkBox->setDisabled(true);
     if (ui->checkBox->isChecked()) {
         socket_ssl.connectToHostEncrypted(ui->leHost->text(), ui->lePort->text().toUShort()); //SSL
         ui->pbConnect->setEnabled(socket_tcp.state() == QAbstractSocket::ConnectedState);
@@ -78,6 +79,7 @@ void Widget::on_pbConnect_clicked()
 
 void Widget::on_pbDisconnect_clicked()
 {
+    ui->checkBox->setDisabled(false);
     if (ui->checkBox->isChecked()) {
         socket_ssl.close();
         ui->pbConnect->setEnabled(socket_ssl.state() != QAbstractSocket::ConnectedState);
